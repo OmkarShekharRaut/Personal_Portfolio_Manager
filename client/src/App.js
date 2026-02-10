@@ -1,23 +1,22 @@
-import logo from './logo.svg';
+import { Routes, Route } from 'react-router-dom';
+
 import './App.css';
-// hello
+import Navbar from './components/Navbar';
+import RegisterForm from './components/Auth/RegisterForm';
+import LoginForm from './components/Auth/LoginForm';
+import PortfolioList from './components/Portfolio/PortfolioList';
+
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div >
+      <h1>PPM app</h1>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<LoginForm />} />
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/portfolio" element={<PortfolioList />} />
+      </Routes>
     </div>
   );
 }

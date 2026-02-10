@@ -1,0 +1,44 @@
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from extensions import db
+from models import Portfolio
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+bp = Blueprint("portfolio", __name__, url_prefix="/portfolio")
+
+
+@bp.route("/", methods=["POST"])
+@jwt_required()
+def create_portfolio():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    portfolio = Portfolio(name=data["name"], user_id=user_id)
+
+    db.session.add(portfolio)
+    db.session.commit()
+
+    return jsonify({"msg": "Portfolio created successfully"}), 201
+
+
+@bp.route("/", methods=["GET"])
+@jwt_required()
+def get_portfolios():
+    user_id = get_jwt_identity()
+    portfolios = Portfolio.query.filter_by(user_id=user_id).all()
+
+    print("PORTFOLIO FETCH from", request.remote_addr)
+
+    return jsonify(
+        [
+            {
+                "id": portfolio.id,
+                "name": portfolio.name,
+            }
+            for portfolio in portfolios
+        ]
+    )
