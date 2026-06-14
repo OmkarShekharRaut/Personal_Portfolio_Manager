@@ -24,7 +24,7 @@ app.config.from_object(Config)
 # app.config["JWT_SECRET_KEY"] = "DEBUG_JWT_SECRET_123"
 
 
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 db.init_app(app)
 jwt.init_app(app)

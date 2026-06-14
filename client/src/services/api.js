@@ -1,80 +1,17 @@
-const API_BASE_URL = "http://localhost:5000";
+import axios from "axios";
 
-export async function registerUser(email, password, name) {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password, name })
-    });
+const api = axios.create({
+    baseURL: "http://localhost:5000",
+});
 
-    const data = await response.json();
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
 
-    return {
-        status: response.status,
-        data
-    };
-}
-
-export async function loginUser(email, password) {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json();
-
-    return {
-        status: response.status,
-        data
-    };
-}
-
-export async function fetchPortfolio(token) {
-    const response = await fetch(`${API_BASE_URL}/portfolio/`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    })
-
-    if (response.status !== 200) {
-        throw new Error('Unauthorised')
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
 
-    return response.json();
-}
+    return config;
+});
 
-export async function createPortfolio(token, name) {
-    const response = await fetch(`${API_BASE_URL}/portfolio/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ name })
-    })
-
-    return response.json();
-}
-
-export async function fetchHoldings(token, portfolioId) {
-    const response = await fetch(`${API_BASE_URL}/holdings/${portfolioId}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    })
-
-    if (response.status !== 200) {
-        throw new Error('Unauthorised')
-    }
-
-    return response.json();
-}
+export default api;
