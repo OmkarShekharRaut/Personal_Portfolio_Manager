@@ -1,16 +1,51 @@
 import api from "./api";
 
-export const getHoldings = async (portfolioId) => {
-    const response = await api.get(`/holdings/${portfolioId}`);
-    return response.data;
-};
+export async function getHoldings(portfolioId) {
 
-export const addHolding = async (portfolioId, holdingData) => {
-    const response = await api.post(`/holdings/${portfolioId}`, holdingData);
-    return response.data;
-};
+    return (
+        await api.get(`/holdings/${portfolioId}`)
+    ).data;
+}
 
-export const deleteHolding = async (holdingId) => {
-    const response = await api.delete(`/holdings/${holdingId}`);
-    return response.data;
-};
+export async function addHolding(
+    portfolioId,
+    holding
+) {
+
+    holding.ticker =
+        holding.ticker.toUpperCase().trim();
+
+    return (
+        await api.post(
+            `/holdings/${portfolioId}`,
+            holding
+        )
+    ).data;
+}
+
+export async function updateHolding(
+    holdingId,
+    holding
+) {
+
+    holding.ticker =
+        holding.ticker.toUpperCase().trim();
+
+    return (
+        await api.put(
+            `/holdings/${holdingId}`,
+            holding
+        )
+    ).data;
+}
+
+export async function deleteHolding(
+    holdingId
+) {
+
+    return (
+        await api.delete(
+            `/holdings/${holdingId}`
+        )
+    ).data;
+}

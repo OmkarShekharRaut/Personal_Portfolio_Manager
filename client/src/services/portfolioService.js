@@ -1,19 +1,27 @@
 import api from "./api";
 
-export const getPortfolios = async () => {
-    const response = await api.get("/portfolio/");
-    return response.data;
-};
+export async function getPortfolios() {
+    return (await api.get("/portfolio/")).data;
+}
 
-export const createPortfolio = async (name) => {
-    const response = await api.post("/portfolio/", {
-        name,
-    });
+export async function createPortfolio(name) {
 
-    return response.data;
-};
+    if (!name.trim()) {
+        throw {
+            msg: "Portfolio name is required.",
+        };
+    }
 
-export const deletePortfolio = async (id) => {
-    const response = await api.delete(`/portfolio/${id}`);
-    return response.data;
+    return (
+        await api.post("/portfolio/", {
+            name: name.trim(),
+        })
+    ).data;
+}
+
+export async function deletePortfolio(id) {
+
+    return (
+        await api.delete(`/portfolio/${id}`)
+    ).data;
 }

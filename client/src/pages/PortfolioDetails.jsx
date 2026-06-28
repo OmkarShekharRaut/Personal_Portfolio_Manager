@@ -12,10 +12,10 @@ function PortfolioDetails() {
 
     console.log("Portfolio ID:", portfolioId);
 
-    const [holdings, setHoldings] = useState([]);
+    const [holdings, setHolding] = useState([]);
 
     const [formData, setFormData] = useState({
-        name: "",
+        ticker: "",
         type: "",
         quantity: "",
         purchase_price: "",
@@ -23,10 +23,10 @@ function PortfolioDetails() {
 
     const token = localStorage.getItem("token");
 
-    const loadHoldings = async () => {
+    const loadHolding = async () => {
         try {
             const data = await getHoldings(portfolioId);
-            setHoldings(data);
+            setHolding(data);
         }
         catch (err) {
             console.error(err);
@@ -34,7 +34,7 @@ function PortfolioDetails() {
     };
 
     useEffect(() => {
-        loadHoldings();
+        loadHolding();
     }, []);
 
     const createHolding = async (e) => {
@@ -50,7 +50,7 @@ function PortfolioDetails() {
                 purchase_price: "",
             });
 
-            loadHoldings();
+            loadHolding();
         }
         catch (err) {
             console.error(err);
@@ -60,7 +60,7 @@ function PortfolioDetails() {
     const deleteHolding = async (holdingId) => {
         try {
             await deleteHolding(holdingId);
-            loadHoldings();
+            loadHolding();
         }
         catch (err) {
             console.error(err);
@@ -127,7 +127,7 @@ function PortfolioDetails() {
 
             <hr />
 
-            <h2>Holdings</h2>
+            <h2>Holding</h2>
 
             {holdings.length === 0 ? (
                 <p>No holdings found.</p>

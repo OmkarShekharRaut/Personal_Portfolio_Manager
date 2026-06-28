@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import db
-from models import Portfolio, Holdings
+from models import Portfolio, Holding
 
 import logging
 
@@ -55,8 +55,6 @@ def delete_portfolio(portfolio_id):
 
     if not portfolio:
         return jsonify({"msg": "Portfolio not found"}), 404
-
-    db.session.query(Holdings).filter_by(portfolio_id=portfolio_id).delete()
 
     db.session.delete(portfolio)
     db.session.commit()
