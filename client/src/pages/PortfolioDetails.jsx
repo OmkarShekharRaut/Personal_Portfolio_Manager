@@ -365,101 +365,144 @@ const [formData, setFormData] = useState({
 
             <h2>Holdings</h2>
 
-            {
+            {portfolio.holdings.length === 0 ? (
 
-                portfolio.holdings.length === 0 ?
+                <p>No holdings found.</p>
 
-                (
+            ) : (
 
-                    <p>No holdings added yet.</p>
+            <table className="holdings-table">
 
-                )
+            <thead>
 
-                :
+            <tr>
 
-                (
+            <th>Ticker</th>
 
-                    portfolio.holdings.map((holding) => (
+            <th>Company</th>
 
-                        <div
+            <th>Qty</th>
 
-                            key={holding.id}
+            <th>Buy</th>
 
-                            style={{
+            <th>Current</th>
 
-                                border: "1px solid #ccc",
+            <th>Investment</th>
 
-                                marginBottom: "12px",
+            <th>Value</th>
 
-                                padding: "12px",
+            <th>P/L</th>
 
-                            }}
+            <th>Return</th>
 
-                        >
+            <th>Action</th>
 
-                            <h3>{holding.ticker}</h3>
+            </tr>
 
-                            <p>
+            </thead>
 
-                                Asset Type : {holding.asset_type}
+            <tbody>
 
-                            </p>
+            {portfolio.holdings.map((holding) => (
 
-                            <p>
+            <tr key={holding.id}>
 
-                                Quantity : {holding.quantity}
+            <td className="ticker">
 
-                            </p>
+            {holding.ticker}
 
-                            <p>
+            </td>
 
-                                Purchase Price : ₹{holding.purchase_price}
+            <td className="company">
 
-                            </p>
+            {holding.company}
 
-                            <p>
+            </td>
 
-                                Purchase Date :
+            <td>
 
-                                {" "}
+            {holding.quantity}
 
-                                {
+            </td>
 
-                                    new Date(
+            <td>
 
-                                        holding.purchase_date
+            ₹{holding.purchase_price.toFixed(2)}
 
-                                    ).toLocaleDateString()
+            </td>
 
-                                }
+            <td>
 
-                            </p>
+            ₹{holding.current_price.toFixed(2)}
 
-                            <button
+            </td>
 
-                                onClick={() =>
+            <td>
 
-                                    handleDeleteHolding(
+            ₹{holding.investment.toLocaleString()}
 
-                                        holding.id
+            </td>
 
-                                    )
+            <td>
 
-                                }
+            ₹{holding.current_value.toLocaleString()}
 
-                            >
+            </td>
 
-                                Delete
-
-                            </button>
-
-                        </div>
-
-                    ))
-
-                )
-
+            <td
+            className={
+            holding.profit >= 0
+            ?
+            "profit"
+            :
+            "loss"
             }
+            >
+
+            ₹{holding.profit.toLocaleString()}
+
+            </td>
+
+            <td
+            className={
+            holding.profit >= 0
+            ?
+            "profit"
+            :
+            "loss"
+            }
+            >
+
+            {holding.profit_percent}%
+
+            </td>
+
+            <td>
+
+            <button
+            className="delete-btn"
+            onClick={() =>
+            handleDeleteHolding(
+            holding.id
+            )
+            }
+            >
+
+            Delete
+
+            </button>
+
+            </td>
+
+            </tr>
+
+            ))}
+
+            </tbody>
+
+            </table>
+
+            )}
 
         </div>
 

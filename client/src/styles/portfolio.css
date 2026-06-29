@@ -88,3 +88,49 @@
     background: var(--primary-dark);
 
 }
+
+.holdings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.holdings-table th {
+    background: var(--primary);
+    color: white;
+    padding: 14px;
+    text-align: left;
+}
+
+.holdings-table td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.holdings-table tr:hover {
+    background: #f8fafc;
+}
+
+.delete-btn {
+    background: var(--danger);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+}
+
+.delete-btn:hover {
+    background: #b91c1c;
+}
+
+.ticker {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.company {
+    color: var(--text-light);
+    font-size: 14px;
+}
