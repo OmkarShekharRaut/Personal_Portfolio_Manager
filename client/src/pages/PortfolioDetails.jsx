@@ -1,62 +1,77 @@
+import "../styles/portfolio.css";
+
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
-    getHoldings,
     addHolding,
     deleteHolding,
 } from "../services/holdingsService";
 
-import { getPortfolioSummary } from "../services/marketService";
+import {
+    getPortfolioSummary,
+} from "../services/marketService";
 
 function PortfolioDetails() {
 
-    const { portfolioId } = useParams();
+const navigate = useNavigate();
 
-    const [holdings, setHoldings] = useState([]);
+const { portfolioId } = useParams();
 
-    const [loading, setLoading] = useState(true);
+const [portfolio, setPortfolio] = useState(null);
 
-    const [error, setError] = useState("");
+const [loading, setLoading] = useState(true);
 
-    const [formData, setFormData] = useState({
+const [error, setError] = useState("");
+
+const loadPortfolio = async () => {
+
+    try {
+
+        setLoading(true);
+
+        const data = await getPortfolioSummary(
+            portfolioId
+        );
+
+        setPortfolio(data);
+
+        setError("");
+
+    }
+
+    catch (err) {
+
+        setError(
+            err.msg ||
+            "Unable to load portfolio."
+        );
+
+    }
+
+    finally {
+
+        setLoading(false);
+
+    }
+
+};
+
+const [formData, setFormData] = useState({
+
         ticker: "",
+
         asset_type: "Stock",
+
         quantity: "",
-        purchase_price: "",
+
+        purchase_price: ""
+
     });
-
-    const loadHoldings = async () => {
-
-        try {
-
-            setLoading(true);
-
-            const data = await getHoldings(portfolioId);
-
-            setHoldings(data);
-
-            setError("");
-
-        }
-
-        catch (err) {
-
-            setError(err.msg || "Unable to load holdings.");
-
-        }
-
-        finally {
-
-            setLoading(false);
-
-        }
-
-    };
 
     useEffect(() => {
 
-        loadHoldings();
+        loadPortfolio();
 
     }, [portfolioId]);
 
@@ -118,7 +133,7 @@ function PortfolioDetails() {
 
             });
 
-            loadHoldings();
+            loadPortfolio();
 
         }
 
@@ -142,7 +157,7 @@ function PortfolioDetails() {
 
             await deleteHolding(holdingId);
 
-            loadHoldings();
+            loadPortfolio();
 
         }
 
@@ -156,7 +171,7 @@ function PortfolioDetails() {
 
     if (loading) {
 
-        return <h2>Loading Holdings...</h2>;
+        return <h2>Loading Portfolio...</h2>;
 
     }
 
@@ -168,7 +183,7 @@ function PortfolioDetails() {
 
                 <h2>{error}</h2>
 
-                <button onClick={loadHoldings}>
+                <button onClick={loadPortfolio}>
 
                     Retry
 
@@ -182,9 +197,95 @@ function PortfolioDetails() {
 
     return (
 
-        <div>
+        <div className="portfolio-container">
 
-            <h1>Portfolio Holdings</h1>
+        <button
+        onClick={() => navigate("/dashboard")}
+        >
+
+        ← Dashboard
+
+        </button>
+
+        <h1>
+
+        {portfolio.portfolio_name}
+
+        </h1>
+
+        <div className="summary-grid">
+
+        <div className="summary-card">
+
+        <h4>Investment</h4>
+
+        <h2>
+
+        ₹{portfolio.summary.total_investment.toLocaleString()}
+
+        </h2>
+
+        </div>
+
+        <div className="summary-card">
+
+        <h4>Current Value</h4>
+
+        <h2>
+
+        ₹{portfolio.summary.current_value.toLocaleString()}
+
+        </h2>
+
+        </div>
+
+        <div className="summary-card">
+
+        <h4>Profit</h4>
+
+        <h2
+
+        className={
+        portfolio.summary.profit >=0
+        ?
+        "profit"
+        :
+        "loss"
+        }
+
+        >
+
+        ₹{portfolio.summary.profit.toLocaleString()}
+
+        </h2>
+
+        </div>
+
+        <div className="summary-card">
+
+        <h4>Return</h4>
+
+        <h2
+
+        className={
+        portfolio.summary.profit >=0
+        ?
+        "profit"
+        :
+        "loss"
+        }
+
+        >
+
+        {portfolio.summary.profit_percent}%
+
+        </h2>
+
+        </div>
+
+        </div>
+
+        <hr />
 
             <h2>Add Holding</h2>
 
@@ -266,7 +367,7 @@ function PortfolioDetails() {
 
             {
 
-                holdings.length === 0 ?
+                portfolio.holdings.length === 0 ?
 
                 (
 
@@ -278,7 +379,7 @@ function PortfolioDetails() {
 
                 (
 
-                    holdings.map((holding) => (
+                    portfolio.holdings.map((holding) => (
 
                         <div
 

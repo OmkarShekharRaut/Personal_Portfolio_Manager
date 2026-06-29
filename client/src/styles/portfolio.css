@@ -1,0 +1,90 @@
+.portfolio-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.summary-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.summary-card h4 {
+    margin: 0;
+    color: var(--text-light);
+}
+
+.summary-card h2 {
+    margin-top: 10px;
+}
+
+.profit {
+    color: var(--success);
+}
+
+.loss {
+    color: var(--danger);
+}
+
+.form-card {
+
+    background: white;
+
+    box-shadow: var(--shadow);
+
+    border-radius: var(--radius);
+
+    padding: 20px;
+
+    margin-bottom: 30px;
+
+}
+
+.form-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(180px,1fr));
+
+    gap: 15px;
+
+}
+
+.form-grid input,
+.form-grid select {
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    border: 1px solid var(--border);
+
+}
+
+.add-btn {
+
+    margin-top: 20px;
+
+    background: var(--primary);
+
+    color: white;
+
+    padding: 12px 20px;
+
+}
+
+.add-btn:hover {
+
+    background: var(--primary-dark);
+
+}
