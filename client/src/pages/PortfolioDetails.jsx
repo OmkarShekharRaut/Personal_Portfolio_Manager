@@ -7,6 +7,8 @@ import {
     deleteHolding,
 } from "../services/holdingsService";
 
+import { getPortfolioSummary } from "../services/marketService";
+
 function PortfolioDetails() {
 
     const { portfolioId } = useParams();
