@@ -19,6 +19,8 @@ from routes.auth import bp as auth_bp
 from routes.portfolio import bp as portfolio_bp
 from routes.holdings import bp as holdings_bp
 
+from routes.market import bp as market_bp
+
 app = Flask(__name__)
 app.config.from_object(Config)
 # app.config["JWT_SECRET_KEY"] = "DEBUG_JWT_SECRET_123"
@@ -32,6 +34,7 @@ jwt.init_app(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(portfolio_bp)
 app.register_blueprint(holdings_bp)
+app.register_blueprint(market_bp)
 
 if __name__ == "__main__":
     app.run(debug=True)
