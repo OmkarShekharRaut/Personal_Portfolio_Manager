@@ -28,20 +28,23 @@ def create_portfolio():
 @bp.route("/", methods=["GET"])
 @jwt_required()
 def get_portfolios():
-    user_id = get_jwt_identity()
-    portfolios = Portfolio.query.filter_by(user_id=user_id).all()
 
-    print("PORTFOLIO FETCH from", request.remote_addr)
+    user_id = int(get_jwt_identity())
 
-    return jsonify(
-        [
-            {
-                "id": portfolio.id,
-                "name": portfolio.name,
-            }
-            for portfolio in portfolios
-        ]
+    portfolios = (
+        Portfolio.query
+        .filter_by(user_id=user_id)
+        .all()
     )
+
+    return jsonify([
+        {
+            "id": portfolio.id,
+            "name": portfolio.name,
+            "holding_count": len(portfolio.holdings)
+        }
+        for portfolio in portfolios
+    ])
 
 
 @bp.route("/<int:portfolio_id>", methods=["DELETE"])
