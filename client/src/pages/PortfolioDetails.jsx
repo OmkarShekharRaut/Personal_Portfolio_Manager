@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+
 import {
     getHoldings,
     addHolding,
@@ -8,164 +8,360 @@ import {
 } from "../services/holdingsService";
 
 function PortfolioDetails() {
+
     const { portfolioId } = useParams();
 
-    console.log("Portfolio ID:", portfolioId);
+    const [holdings, setHoldings] = useState([]);
 
-    const [holdings, setHolding] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const [error, setError] = useState("");
 
     const [formData, setFormData] = useState({
         ticker: "",
-        type: "",
+        asset_type: "Stock",
         quantity: "",
         purchase_price: "",
     });
 
-    const token = localStorage.getItem("token");
+    const loadHoldings = async () => {
 
-    const loadHolding = async () => {
         try {
+
+            setLoading(true);
+
             const data = await getHoldings(portfolioId);
-            setHolding(data);
+
+            setHoldings(data);
+
+            setError("");
+
         }
+
         catch (err) {
-            console.error(err);
+
+            setError(err.msg || "Unable to load holdings.");
+
         }
+
+        finally {
+
+            setLoading(false);
+
+        }
+
     };
 
     useEffect(() => {
-        loadHolding();
-    }, []);
 
-    const createHolding = async (e) => {
+        loadHoldings();
+
+    }, [portfolioId]);
+
+    const handleChange = (e) => {
+
+        const { name, value } = e.target;
+
+        setFormData((prev) => ({
+
+            ...prev,
+
+            [name]: value,
+
+        }));
+
+    };
+
+    const handleSubmit = async (e) => {
+
         e.preventDefault();
 
+        if (!formData.ticker.trim()) {
+
+            alert("Ticker is required.");
+
+            return;
+
+        }
+
+        if (Number(formData.quantity) <= 0) {
+
+            alert("Quantity must be greater than zero.");
+
+            return;
+
+        }
+
+        if (Number(formData.purchase_price) <= 0) {
+
+            alert("Purchase price must be greater than zero.");
+
+            return;
+
+        }
+
         try {
+
             await addHolding(portfolioId, formData);
 
             setFormData({
-                name: "",
-                type: "",
+
+                ticker: "",
+
+                asset_type: "Stock",
+
                 quantity: "",
+
                 purchase_price: "",
+
             });
 
-            loadHolding();
+            loadHoldings();
+
         }
+
         catch (err) {
-            console.error(err);
+
+            alert(err.msg || "Unable to add holding.");
+
         }
+
     };
 
-    const deleteHolding = async (holdingId) => {
+    const handleDeleteHolding = async (holdingId) => {
+
+        if (!window.confirm("Delete this holding?")) {
+
+            return;
+
+        }
+
         try {
+
             await deleteHolding(holdingId);
-            loadHolding();
+
+            loadHoldings();
+
         }
+
         catch (err) {
-            console.error(err);
+
+            alert(err.msg || "Unable to delete holding.");
+
         }
+
     };
+
+    if (loading) {
+
+        return <h2>Loading Holdings...</h2>;
+
+    }
+
+    if (error) {
+
+        return (
+
+            <div>
+
+                <h2>{error}</h2>
+
+                <button onClick={loadHoldings}>
+
+                    Retry
+
+                </button>
+
+            </div>
+
+        );
+
+    }
 
     return (
+
         <div>
-            <h1>Portfolio Details</h1>
+
+            <h1>Portfolio Holdings</h1>
 
             <h2>Add Holding</h2>
 
-            <form onSubmit={createHolding}>
-                <input
-                    placeholder="Asset Name"
-                    value={formData.name}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            name: e.target.value,
-                        })
-                    }
-                />
+            <form onSubmit={handleSubmit}>
 
                 <input
-                    placeholder="Type"
-                    value={formData.type}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            type: e.target.value,
-                        })
-                    }
+
+                    name="ticker"
+
+                    placeholder="Ticker (AAPL)"
+
+                    value={formData.ticker}
+
+                    onChange={handleChange}
+
                 />
 
+                <select
+
+                    name="asset_type"
+
+                    value={formData.asset_type}
+
+                    onChange={handleChange}
+
+                >
+
+                    <option>Stock</option>
+
+                    <option>ETF</option>
+
+                    <option>Mutual Fund</option>
+
+                    <option>Crypto</option>
+
+                    <option>Bond</option>
+
+                </select>
+
                 <input
+
+                    name="quantity"
+
                     type="number"
+
                     placeholder="Quantity"
+
                     value={formData.quantity}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            quantity: e.target.value,
-                        })
-                    }
+
+                    onChange={handleChange}
+
                 />
 
                 <input
+
+                    name="purchase_price"
+
                     type="number"
+
                     placeholder="Purchase Price"
+
                     value={formData.purchase_price}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            purchase_price: e.target.value,
-                        })
-                    }
+
+                    onChange={handleChange}
+
                 />
 
                 <button type="submit">
+
                     Add Holding
+
                 </button>
+
             </form>
 
             <hr />
 
-            <h2>Holding</h2>
+            <h2>Holdings</h2>
 
-            {holdings.length === 0 ? (
-                <p>No holdings found.</p>
-            ) : (
-                holdings.map((holding) => (
-                    <div
-                        key={holding.id}
-                        style={{
-                            border: "1px solid gray",
-                            margin: "10px",
-                            padding: "10px",
-                        }}
-                    >
-                        <h3>{holding.name}</h3>
+            {
 
-                        <p>Type: {holding.type}</p>
+                holdings.length === 0 ?
 
-                        <p>
-                            Quantity: {holding.quantity}
-                        </p>
+                (
 
-                        <p>
-                            Purchase Price: ₹
-                            {holding.purchase_price}
-                        </p>
+                    <p>No holdings added yet.</p>
 
-                        <button
-                            onClick={() =>
-                                deleteHolding(holding.id)
-                            }
+                )
+
+                :
+
+                (
+
+                    holdings.map((holding) => (
+
+                        <div
+
+                            key={holding.id}
+
+                            style={{
+
+                                border: "1px solid #ccc",
+
+                                marginBottom: "12px",
+
+                                padding: "12px",
+
+                            }}
+
                         >
-                            Delete
-                        </button>
-                    </div>
-                ))
-            )}
+
+                            <h3>{holding.ticker}</h3>
+
+                            <p>
+
+                                Asset Type : {holding.asset_type}
+
+                            </p>
+
+                            <p>
+
+                                Quantity : {holding.quantity}
+
+                            </p>
+
+                            <p>
+
+                                Purchase Price : ₹{holding.purchase_price}
+
+                            </p>
+
+                            <p>
+
+                                Purchase Date :
+
+                                {" "}
+
+                                {
+
+                                    new Date(
+
+                                        holding.purchase_date
+
+                                    ).toLocaleDateString()
+
+                                }
+
+                            </p>
+
+                            <button
+
+                                onClick={() =>
+
+                                    handleDeleteHolding(
+
+                                        holding.id
+
+                                    )
+
+                                }
+
+                            >
+
+                                Delete
+
+                            </button>
+
+                        </div>
+
+                    ))
+
+                )
+
+            }
+
         </div>
+
     );
+
 }
 
 export default PortfolioDetails;
