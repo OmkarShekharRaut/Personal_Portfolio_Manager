@@ -1,6 +1,7 @@
 import yfinance as yf
 
 from models import Portfolio
+from collections import defaultdict
 
 class MarketService:
 
@@ -80,62 +81,29 @@ class MarketService:
                 "message": "Portfolio not found"
             }
 
-        summary = []
+        holdings_data = []
 
+        # -----------------------------
+        # Build holding data
+        # -----------------------------
         for holding in portfolio.holdings:
 
-            quote = MarketService.get_quote(
-                holding.ticker
-            )
+            quote = MarketService.get_quote(holding.ticker)
 
             if not quote["success"]:
                 continue
 
-            investment = (
-                holding.quantity *
-                holding.purchase_price
-            )
-
-            current_value = (
-                holding.quantity *
-                quote["price"]
-            )
+            investment = holding.quantity * holding.purchase_price
+            current_value = holding.quantity * quote["price"]
 
             profit = current_value - investment
 
-            profit_percent = 0
+            profit_percent = (
+                (profit / investment) * 100
+                if investment > 0 else 0
+            )
 
-            if investment > 0:
-                profit_percent = (
-                    profit / investment
-                ) * 100
-
-            total_investment = round(
-                    sum(h["investment"] for h in summary),
-                    2
-                )
-
-            current_value = round(
-                    sum(h["current_value"] for h in summary),
-                    2
-                )
-
-            profit = round(
-                    current_value - total_investment,
-                    2
-                )
-
-            profit_percent = 0
-
-            if total_investment > 0:
-                    profit_percent = round(
-                        (profit / total_investment) * 100,
-                        2
-                    )
-
-            total_holdings = len(summary)
-
-            summary.append({
+            holdings_data.append({
 
                 "id": holding.id,
 
@@ -149,41 +117,118 @@ class MarketService:
 
                 "purchase_price": holding.purchase_price,
 
-                "purchase_date": holding.purchase_date,
+                "purchase_date": holding.purchase_date.isoformat(),
 
                 "current_price": quote["price"],
 
-                "current_value": round(
-                    current_value,
-                    2
-                ),
+                "investment": round(investment, 2),
 
-                "investment": round(
-                    investment,
-                    2
-                ),
+                "current_value": round(current_value, 2),
 
-                "profit": round(
-                    profit,
-                    2
-                ),
+                "profit": round(profit, 2),
 
-                "profit_percent": round(
-                    profit_percent,
-                    2
-                ),
+                "profit_percent": round(profit_percent, 2),
 
                 "change": quote["change"],
 
-                "change_percent": quote[
-                    "change_percent"
-                ],
+                "change_percent": quote["change_percent"],
 
                 "currency": quote["currency"]
 
+            })
+
+        # -----------------------------
+        # Portfolio Summary
+        # -----------------------------
+        total_investment = round(
+            sum(h["investment"] for h in holdings_data),
+            2
+        )
+
+        current_value = round(
+            sum(h["current_value"] for h in holdings_data),
+            2
+        )
+
+        total_profit = round(
+            current_value - total_investment,
+            2
+        )
+
+        profit_percent = round(
+            (total_profit / total_investment) * 100,
+            2
+        ) if total_investment > 0 else 0
+
+        # -----------------------------
+        # Analytics
+        # -----------------------------
+        asset_allocation = defaultdict(float)
+
+        holding_allocation = []
+
+        for holding in holdings_data:
+
+            asset_allocation[
+                holding["asset_type"]
+            ] += holding["current_value"]
+
+            holding_allocation.append({
+
+                "ticker": holding["ticker"],
+
+                "company": holding["company"],
+
+                "value": holding["current_value"]
 
             })
 
+        holding_allocation.sort(
+            key=lambda x: x["value"],
+            reverse=True
+        )
+
+        sorted_profit = sorted(
+            holdings_data,
+            key=lambda x: x["profit"],
+            reverse=True
+        )
+
+        top_gainers = [
+
+            {
+
+                "ticker": h["ticker"],
+
+                "company": h["company"],
+
+                "profit": h["profit"]
+
+            }
+
+            for h in sorted_profit[:5]
+
+        ]
+
+        top_losers = [
+
+            {
+
+                "ticker": h["ticker"],
+
+                "company": h["company"],
+
+                "profit": h["profit"]
+
+            }
+
+            for h in sorted_profit[-5:]
+
+        ]
+
+        # -----------------------------
+        # Final Response
+        # -----------------------------
         return {
 
             "success": True,
@@ -194,18 +239,42 @@ class MarketService:
 
             "summary": {
 
-                "total_holdings": total_holdings,
+                "total_holdings": len(holdings_data),
 
                 "total_investment": total_investment,
 
                 "current_value": current_value,
 
-                "profit": profit,
+                "profit": total_profit,
 
                 "profit_percent": profit_percent
 
             },
 
-            "holdings": summary
+            "analytics": {
+
+                "asset_allocation": [
+
+                    {
+
+                        "asset_type": asset,
+
+                        "value": round(value, 2)
+
+                    }
+
+                    for asset, value in asset_allocation.items()
+
+                ],
+
+                "holding_allocation": holding_allocation,
+
+                "top_gainers": top_gainers,
+
+                "top_losers": top_losers
+
+            },
+
+            "holdings": holdings_data
 
         }
